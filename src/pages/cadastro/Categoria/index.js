@@ -11,12 +11,13 @@ function CadastroCategoria() {
     cor: '',
   };
   const [categorias, setCategorias] = useState([]);
-  const [values, setvalues] = useState(valoresIniciais);
+  const [values, setValues] = useState(valoresIniciais);
 
   function setValue(chave, valor) {
-    setvalues({
+    // chave: nome, descricao, bla, bli
+    setValues({
       ...values,
-      [chave]: valor,
+      [chave]: valor, // nome: 'valor'
     });
   }
 
@@ -28,16 +29,19 @@ function CadastroCategoria() {
   }
 
   useEffect(() => {
-    const URL = 'http://localhost:8080/categorias';
-
-    fetch(URL)
-      .then(async (respostaDoServidor) => {
-        const resposta = await respostaDoServidor.json();
-        setCategorias({
-          ...resposta,
+    if (window.location.href.includes('localhost')) {
+      const URL = 'http://localhost:8080/categorias';
+      fetch(URL)
+        .then(async (respostaDoServer) => {
+          if (respostaDoServer.ok) {
+            const resposta = await respostaDoServer.json();
+            setCategorias(resposta);
+            return;
+          }
+          throw new Error('Não foi possível pegar os dados');
         });
-      });
-  });
+    }
+  }, []);
 
   return (
     <PageDefault>
@@ -48,12 +52,13 @@ function CadastroCategoria() {
 
       <form onSubmit={function handleSubmit(infosDoEvento) {
         infosDoEvento.preventDefault();
+
         setCategorias([
           ...categorias,
           values,
         ]);
 
-        setvalues(valoresIniciais);
+        setValues(valoresIniciais);
       }}
       >
 
@@ -87,8 +92,8 @@ function CadastroCategoria() {
       </form>
       <ul>
         {categorias.map((categoria) => (
-          <li key={`${categoria.nome}`}>
-            {categoria.nome}
+          <li key={`${categoria.id}`}>
+            {categoria.titulo}
           </li>
         ))}
       </ul>
